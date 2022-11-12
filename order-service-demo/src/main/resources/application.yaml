@@ -1,0 +1,50 @@
+server:
+  port: 8093
+
+spring:
+  application:
+    name: newbee-cloud-order-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+#      username: nacos
+#      password: nacos
+
+  # datasource config
+  datasource:
+    url: jdbc:mysql://localhost:3306/test_distribution_order_db?useUnicode=true&characterEncoding=utf8&autoReconnect=true&useSSL=false
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: li970511
+
+# OpenFeign超时时间
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 2000
+        readTimeout: 5000
+
+## seata config
+seata:
+  #是否开启自动配置
+  enabled: true
+  application-id: order-server
+  #事务分组配置
+  tx-service-group: test_save_order_group
+  service:
+    vgroup-mapping:
+      test_save_order_group: default
+  #连接Nacos服务中心的配置信息
+  registry:
+    type: nacos
+    nacos:
+      application: seata-server
+      server-addr: localhost:8848
+      username: nacos
+      password: nacos
+      group: DEFAULT_GROUP
+      cluster: default
+
+
