@@ -1,5 +1,6 @@
 package com.newbee.cloud.controller;
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.alibaba.nacos.api.annotation.NacosProperties;
 import com.newbee.cloud.entity.NewBeeCartItem;
 import com.newbee.cloud.entity.NewBeeGoodsInfo;
@@ -42,7 +43,7 @@ public class ConsumerTestController {
         return newBeeGoodsDemoService.getServerPort() + "  当前Order服务器端口号："+ serverPort;
     }
 
-    @GetMapping("/order/detail/{goodsId}")
+    @GetMapping("/order/goodsDetail/{goodsId}")
     public String goodsDetail(@PathVariable("goodsId") Integer goodsId){
         return newBeeGoodsDemoService.goodsDetail(goodsId);
     }
@@ -112,12 +113,64 @@ public class ConsumerTestController {
     }
 
 
+    /* seata测试 */
     @Resource
     private OrderService orderService;
 
+    @SentinelResource(value = "订单流程")
     @GetMapping("/order/saveOrder")
     public Result saveOrder(@RequestParam("cartId") int cartId) {
         return orderService.saveOrder(cartId);
     }
 
+    /* Sleuth测试 */
+    @GetMapping("/order/saveOrderWithSleuth")
+    public Result saveOrderWithSleuth(@RequestParam("cartId") int cartId) {
+        return orderService.saveOrderWithSleuth(cartId);
+    }
+
+    @GetMapping("/order/cartDetail/{cartId}")
+    public String cartDetail(@PathVariable("cartId") Integer cartId){
+        return newBeeShopCartDemoService.cartItemDetail(cartId);
+    }
+
+    /* sentinel测试 */
+    @GetMapping("/order/testChainApi1")
+    public String testChainApi1() {
+        String result = orderService.getNumber(2022);
+        if ("BLOCKED".equals(result)){
+            return "testChainApi1 error! "+result;
+        }
+        return "testChainApi1 success! "+result;
+    }
+
+    @GetMapping("/order/testChainApi2")
+    public String testChainApi2() {
+        String result = orderService.getNumber(2025);
+        if ("BLOCKED".equals(result)){
+            return "testChainApi2 error! "+result;
+        }
+        return "testChainApi2 success! "+result;
+    }
+
+    @GetMapping("/order/testRelateApi1")
+    public String testRelateApi1() {
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            return "testRelateApi1 error!";
+        }
+//        int i = 10 / 0;
+        return "testRelateApi1 success!";
+    }
+
+    @GetMapping("/order/testRelateApi2")
+    public String testRelateApi2() {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            return "testRelateApi2 error!";
+        }
+        return "testRelateApi2 success!";
+    }
 }

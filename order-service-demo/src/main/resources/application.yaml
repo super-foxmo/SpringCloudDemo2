@@ -1,5 +1,5 @@
 server:
-  port: 8093
+  port: 8083
 
 spring:
   application:
@@ -7,9 +7,18 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: localhost:8848
+        server-addr: 1.14.244.42:8848
 #      username: nacos
 #      password: nacos
+
+    # 默认为8719，作用：启动一个HTTP客户端服务，该服务将于Sentinel控制台进行数据交互。如果该端口被占用，则从8719依次+1扫描
+    sentinel:
+      transport:
+        port: 8719
+        # 指定Sentinel控制台地址
+        dashboard: localhost:8090
+      ## 链路流控策略生效
+      web-context-unify: false
 
   # datasource config
   datasource:
@@ -26,6 +35,13 @@ feign:
         connectTimeout: 2000
         readTimeout: 5000
 
+# 开启open feign debug级别日志
+#logging:
+#  level: debug
+#logging:
+#  level:
+#    ltd.order.cloud.newbee.openfeign=debug
+
 ## seata config
 seata:
   #是否开启自动配置
@@ -41,10 +57,9 @@ seata:
     type: nacos
     nacos:
       application: seata-server
-      server-addr: localhost:8848
+      server-addr: 1.14.244.42:8848
       username: nacos
       password: nacos
       group: DEFAULT_GROUP
       cluster: default
-
 

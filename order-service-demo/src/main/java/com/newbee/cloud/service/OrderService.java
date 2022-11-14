@@ -1,5 +1,6 @@
 package com.newbee.cloud.service;
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.newbee.cloud.entity.Result;
 import com.newbee.cloud.openfeign.NewBeeGoodsDemoService;
 import com.newbee.cloud.openfeign.NewBeeShopCartDemoService;
@@ -42,8 +43,39 @@ public class OrderService {
             //新增订单（向订单表中新增一条记录）
             int orderResult = jdbcTemplate.update("insert into tb_order(`cart_id`) value (" + cartId + ")");
 
-            // 此处出现了异常
-            int i=1/0;
+//            // 此处出现了异常
+//            int i=1/0;
+
+            if (orderResult > 0){
+                return new Result(200,"Success");
+            }
+            return new Result(400,"false");
+        }
+        return new Result(400,"false");
+    }
+
+    @SentinelResource(value = "getNumber")
+    public String getNumber(int i) {
+        if (i == 2022) {
+            return "BLOCKED";
+        }
+        return "NO_BLOCKED";
+    }
+
+    /* sleuth测试 */
+    @GlobalTransactional
+    public Result saveOrderWithSleuth(int cartId){
+        // 简单的模拟下单流程，包括服务间的调用流程。
+
+        // 调用购物车服务-获取即将操作的goods_id
+        int goodsId = newBeeShopCartDemoService.getGoodsId(cartId);
+        //调用购物车服务-删除当前购物车数据和库存数据
+        Boolean cartResult = newBeeShopCartDemoService.deleteCartAndGoods(cartId,goodsId);
+
+        //执行下单逻辑
+        if (cartResult){
+            //新增订单（向订单表中新增一条记录）
+            int orderResult = jdbcTemplate.update("insert into tb_order(`cart_id`) value (" + cartId + ")");
 
             if (orderResult > 0){
                 return new Result(200,"Success");

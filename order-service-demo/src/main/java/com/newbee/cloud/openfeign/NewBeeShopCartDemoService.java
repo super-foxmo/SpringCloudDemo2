@@ -17,4 +17,8 @@ public interface NewBeeShopCartDemoService {
 
     @DeleteMapping(value = "/{cartId}")
     Boolean deleteItem(@PathVariable(value = "cartId") int cartId);
+
+    @DeleteMapping(value = "/{cartId}/{goodsId}")
+    Boolean deleteCartAndGoods(@PathVariable(value = "cartId") int cartId,
+                               @PathVariable(value = "goodsId") int goodsId);
 }

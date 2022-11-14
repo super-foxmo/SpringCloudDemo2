@@ -1,11 +1,14 @@
 package com.newbee.cloud.controller;
 
+import com.newbee.cloud.openfeign.NewBeeGoodsDemoService;
+import io.seata.spring.annotation.GlobalTransactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.smartcardio.CardTerminal;
 import java.util.Map;
 
 @RestController
@@ -15,8 +18,9 @@ public class NewBeeCloudShopCartController {
 
     @GetMapping("/shop-cart/detail")
     public String cartItemDetail(@RequestParam("cartId") int cartId) {
+        String detail2Result = newBeeGoodsDemoService.getGoodsDetail2(2025);
         // 根据id查询商品并返回给调用端
-        if (cartId < 0 || cartId > 1000) {
+        if (cartId < 0 || cartId > 100000) {
             return "查询购物项为空，当前服务的端口号为" + serverPort;
         }
         String cartItem = "购物项" + cartId;
@@ -58,4 +62,27 @@ public class NewBeeCloudShopCartController {
         }
         return false;
     }
+
+    /* Sleutn测试 */
+    @Resource
+    private NewBeeGoodsDemoService newBeeGoodsDemoService;
+
+    @DeleteMapping("/shop-cart/{cartId}/{goodsId}")
+    @GlobalTransactional
+    public Boolean deleteCartAndGoods(@PathVariable("cartId") int cartId,
+                                      @PathVariable("goodsId") int goodsId) {
+        // 删除购物车数据
+        int cartSesult = jdbcTemplate.update("delete from tb_cart_item where cart_id=" + cartId);
+
+        if (cartSesult > 0) {
+            //删除库存数据
+            Boolean goodsResult = newBeeGoodsDemoService.deStock(goodsId);
+            if (goodsResult){
+                return true;
+            }
+            return false;
+        }
+        return false;
+    }
+
 }
